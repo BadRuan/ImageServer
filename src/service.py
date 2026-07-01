@@ -1,0 +1,59 @@
+from typing import List, Optional
+from os import path, makedirs, remove
+from pathlib import Path
+from sqlmodel.ext.asyncio.session import AsyncSession
+from src.settings import image_dir
+from src.model import ImageRecord, PageResponse
+from src.crud import ImageCrud
+from src.utils import generate_webp_images
+
+
+class ImageService:
+    def __init__(self, session: AsyncSession) -> None:
+        self.crud = ImageCrud(session)
+        for i in [image_dir.raw, image_dir.preview, image_dir.thumb]:
+            if not path.exists(i):
+                makedirs(i)
+    
+    async def list_paginated(self, page: int, page_size: int) -> PageResponse[ImageRecord]:
+        return await self.crud.list_paginated(page, page_size)
+    
+    async def add(self, filename: str, mime_type: str, content: bytes) -> Optional[ImageRecord]:
+        suffiex = Path(filename).suffix
+        slugname = ImageRecord.gen_slug() + suffiex
+        filepath = path.join(image_dir.raw, slugname)
+        
+        with open(filepath, 'wb') as f:
+            f.write(content)
+        # 生成预览图和缩略图
+        await generate_webp_images(slugname)
+        
+        await self.crud.add(
+            raw_filename=filename,
+            slug=slugname,
+            mime_type=mime_type,
+            size=len(content)
+        )
+        image = await self.crud.get_by_slug(slugname)
+        
+        return image
+    
+    async def remove_by_slug(self, slugname: str) -> bool:
+        result = await self.crud.remove_by_slug(slugname)
+        if result:
+            slug, suffiex = path.splitext(slugname)
+            raw_file_path = path.join(image_dir.raw, slugname)
+            preview_file_path = path.join(image_dir.preview, slug + '.webp')
+            thumb_file_path = path.join(image_dir.thumb, slug + '.webp')
+            if path.isfile(raw_file_path):
+                remove(raw_file_path)
+                remove(preview_file_path)
+                remove(thumb_file_path)
+            return True
+        return False
+    
+    async def get_by_slug(self, slugname: str) -> Optional[ImageRecord]:
+        return await self.crud.get_by_slug(slugname)
+    
+    async def get_by_id(self, id: int) -> Optional[ImageRecord]:
+        return await self.crud.get_by_id(id)

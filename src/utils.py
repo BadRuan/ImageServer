@@ -1,0 +1,35 @@
+from typing import NamedTuple
+from os import path
+from PIL import Image
+from src.settings import image_dir
+
+class Dist_Dir(NamedTuple):
+    preview: str
+    thumb: str
+
+async def generate_webp_images(slug_name: str, preview_size=(1200, 1200), thumb_size=(300, 300)) -> Dist_Dir:
+    """
+    压缩图片并生成 WebP 格式的预览图和缩略图
+    返回一个字典，包含生成的预览图和缩略图的文件名
+    """
+    slug, _ = path.splitext(slug_name)
+    path_raw = path.join(image_dir.raw, slug_name)
+    path_preview = path.join(image_dir.preview, slug + '.webp')
+    path_thumb = path.join(image_dir.thumb, slug + '.webp')
+
+
+    with Image.open(path_raw) as img:
+        # 统一转为 RGB（处理 PNG 透明通道问题）
+        img_rgb = img.convert("RGB")
+
+        # 1. 生成网页预览图
+        preview_img = img_rgb.copy()
+        preview_img.thumbnail(preview_size, Image.Resampling.LANCZOS)
+        preview_img.save(path_preview, "WEBP", quality=85, method=6) # method=6 压缩率最高
+
+        # 2. 生成缩略图
+        thumb_img = img_rgb.copy()
+        thumb_img.thumbnail(thumb_size, Image.Resampling.LANCZOS)
+        thumb_img.save(path_thumb, "WEBP", quality=75, method=6)
+            
+        return Dist_Dir(preview=path_preview, thumb=path_thumb)
