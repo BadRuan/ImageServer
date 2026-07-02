@@ -12,6 +12,7 @@ class ImageRecord(SQLModel, table=True):
     raw_filename: str = Field(max_length=255)
     mime_type: str = Field(max_length=50)
     size_bytes: int
+    view: int = Field(default=0)
     uploaded_at: datetime = Field(default_factory=datetime.now)
     
     @staticmethod

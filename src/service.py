@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Optional
 from os import path, makedirs, remove
 from pathlib import Path
 from sqlmodel.ext.asyncio.session import AsyncSession
@@ -38,6 +38,7 @@ class ImageService:
         
         return image
     
+    
     async def remove_by_slug(self, slugname: str) -> bool:
         result = await self.crud.remove_by_slug(slugname)
         if result:
@@ -53,7 +54,7 @@ class ImageService:
         return False
     
     async def get_by_slug(self, slugname: str) -> Optional[ImageRecord]:
-        return await self.crud.get_by_slug(slugname)
-    
-    async def get_by_id(self, id: int) -> Optional[ImageRecord]:
-        return await self.crud.get_by_id(id)
+        image: Optional[ImageRecord] = await self.crud.get_by_slug(slugname)
+        if image is not None:
+            await self.crud.recoder_view(slugname)
+        return image

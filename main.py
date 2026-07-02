@@ -3,7 +3,6 @@ from os import path
 from fastapi import FastAPI, Depends, UploadFile, HTTPException, status, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
-from pydantic import BaseModel
 from sqlmodel.ext.asyncio.session import AsyncSession
 from src.settings import image_dir, ALLOW_TYPE
 from src.database import get_session
@@ -21,12 +20,7 @@ app.add_middleware(
     allow_headers=["*"],  # 允许所有请求头
 )
 
-class ImageOut(BaseModel):
-    id: int
-    slug: str
-    raw_filename: str
-    mime_type: str 
-    
+   
 
 @app.get('/images', response_model=PageResponse)
 async def get_images(

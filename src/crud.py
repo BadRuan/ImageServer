@@ -1,5 +1,5 @@
 from typing import List, Optional
-from sqlmodel import select, func, desc
+from sqlmodel import select, update, func, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .model import ImageRecord, PageResponse
 
@@ -22,7 +22,7 @@ class ImageCrud:
             .order_by(desc(ImageRecord.id))
         )
         results = await self.session.exec(data_stmt)
-        items: List[ImageRecord] = list(results.all())
+        items: List[ImageRecord] = list(results.all()) # type: ignore
         return PageResponse(
             total=total_count,
             page=page,
@@ -52,6 +52,15 @@ class ImageCrud:
         item = self.session.add(image_record) 
         await self.session.commit()
         return item
+    
+    async def recoder_view(self, slugname: str) -> None:
+        stmt = (
+            update(ImageRecord)
+            .where(ImageRecord.slug == slugname) # type: ignore
+            .values({ImageRecord.view: ImageRecord.view + 1})
+        )
+        result = await self.session.exec(stmt)
+        await self.session.commit()
     
     async def remove_by_slug(self, slugname: str) -> bool:
         image = await self.get_by_slug(slugname)
