@@ -35,10 +35,8 @@ class ImageService:
             size=len(content)
         )
         image = await self.crud.get_by_slug(slugname)
-        
         return image
-    
-    
+
     async def remove_by_slug(self, slugname: str) -> bool:
         result = await self.crud.remove_by_slug(slugname)
         if result:
@@ -57,4 +55,7 @@ class ImageService:
         image: Optional[ImageRecord] = await self.crud.get_by_slug(slugname)
         if image is not None:
             await self.crud.recoder_view(slugname)
-        return image
+            await self.crud.session.refresh(image)
+            return image
+        else:
+            return None

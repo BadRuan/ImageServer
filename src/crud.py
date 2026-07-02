@@ -1,4 +1,5 @@
 from typing import List, Optional
+from sqlalchemy.orm import selectinload
 from sqlmodel import select, update, func, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
 from .model import ImageRecord, PageResponse
@@ -36,11 +37,6 @@ class ImageCrud:
         image = result.first()
         return image
     
-    async def get_by_id(self, id: int) -> Optional[ImageRecord]:
-        stmt = select(ImageRecord).where(ImageRecord.id == id)
-        result = await self.session.exec(stmt)
-        image = result.first()
-        return image
     
     async def add(self, raw_filename: str, slug: str, mime_type: str, size: int) -> Optional[ImageRecord]:
         image_record = ImageRecord(
@@ -59,19 +55,11 @@ class ImageCrud:
             .where(ImageRecord.slug == slugname) # type: ignore
             .values({ImageRecord.view: ImageRecord.view + 1})
         )
-        result = await self.session.exec(stmt)
+        await self.session.exec(stmt)
         await self.session.commit()
     
     async def remove_by_slug(self, slugname: str) -> bool:
         image = await self.get_by_slug(slugname)
-        if image is not None:
-            await self.session.delete(image)
-            await self.session.commit()
-            return True
-        return False
-
-    async def remove_by_id(self, id: int) -> bool:
-        image = await self.get_by_id(id)
         if image is not None:
             await self.session.delete(image)
             await self.session.commit()

@@ -21,7 +21,6 @@ app.add_middleware(
 )
 
    
-
 @app.get('/images', response_model=PageResponse)
 async def get_images(
     page: int = Query(default=1, ge=1 ,description='页码'),
@@ -61,18 +60,18 @@ class TypeName(str, Enum):
     thumb = 'thumb'
 
 @app.get('/image/{slug}')
-async def get_image(slug, _type: TypeName = TypeName.preivew, session: AsyncSession = Depends(get_session)):
+async def get_image(slug, _t: TypeName = TypeName.preivew, session: AsyncSession = Depends(get_session)):
     service = ImageService(session)
     image = await service.get_by_slug(slug)
     if image is not None:
-        if _type == TypeName.raw:
+        if _t == TypeName.raw:
             file_path = path.join(image_dir.raw, slug)  
-        elif _type == TypeName.preivew:
+        elif _t == TypeName.preivew:
             slug, _ = path.splitext(slug)
-            file_path = path.join(image_dir.preview, slug+ '.webp')
-        elif _type == TypeName.thumb:
+            file_path = path.join(image_dir.preview, slug + '.webp')
+        elif _t == TypeName.thumb:
             slug, _ = path.splitext(slug)
-            file_path = path.join(image_dir.thumb, slug+ '.webp')
+            file_path = path.join(image_dir.thumb, slug + '.webp')
         return FileResponse(
                 path=file_path, 
                 media_type=image.mime_type, 
