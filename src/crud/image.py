@@ -1,8 +1,7 @@
 from typing import List, Optional
-from sqlalchemy.orm import selectinload
 from sqlmodel import select, update, func, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
-from .model import ImageRecord, PageResponse
+from src.model import ImageRecord, PageResponse
 
 
 class ImageCrud:

@@ -12,12 +12,9 @@ class Settings(BaseSettings):
 class IMAGE_DIR(NamedTuple):
     raw: str
     preview: str
-    thumb: str
-    
     
 image_dir = IMAGE_DIR(raw='./uploads/raw', 
-                      preview='./uploads/preview', 
-                      thumb='./uploads/thumb'
+                      preview='./uploads/preview'
                       )
 ALLOW_TYPE: List[str] = ["image/jpeg", "image/png", "image/webp"]
 

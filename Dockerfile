@@ -5,4 +5,4 @@ COPY . /app
 RUN pip install --no-cache-dir  --trusted-host mirrors.huaweicloud.com -i https://mirrors.huaweicloud.com/repository/pypi/simple   -r requirements.txt
 VOLUME ["/app/uploads"]
 EXPOSE 80
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "80"]
+CMD ["python", "main.py"]

@@ -11,7 +11,7 @@ from src.utils import generate_webp_images
 class ImageService:
     def __init__(self, session: AsyncSession) -> None:
         self.crud = ImageCrud(session)
-        for i in [image_dir.raw, image_dir.preview, image_dir.thumb]:
+        for i in [image_dir.raw, image_dir.preview]:
             if not path.exists(i):
                 makedirs(i)
     
@@ -40,14 +40,12 @@ class ImageService:
     async def remove_by_slug(self, slugname: str) -> bool:
         result = await self.crud.remove_by_slug(slugname)
         if result:
-            slug, suffiex = path.splitext(slugname)
+            slug, _ = path.splitext(slugname)
             raw_file_path = path.join(image_dir.raw, slugname)
-            preview_file_path = path.join(image_dir.preview, slug + '.webp')
-            thumb_file_path = path.join(image_dir.thumb, slug + '.webp')
+            preview_file_path = path.join(image_dir.preview, slug + '.webp')  
             if path.isfile(raw_file_path):
                 remove(raw_file_path)
                 remove(preview_file_path)
-                remove(thumb_file_path)
             return True
         return False
     
