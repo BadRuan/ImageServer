@@ -1,25 +1,25 @@
 from typing import List, Optional
 from sqlmodel import select, update, func, desc
 from sqlmodel.ext.asyncio.session import AsyncSession
-from src.model import Image, PageResponse
+from src.model import Document, PageResponse
 
 
-class ImageCrud:
+class DocumentCrud:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
         
-    async def list_paginated(self, page: int, page_size: int) -> PageResponse[Image]:
-        count_stmt = select(func.count()).select_from(Image)
+    async def list_paginated(self, page: int, page_size: int) -> PageResponse[Document]:
+        count_stmt = select(func.count()).select_from(Document)
         total = await self.session.exec(count_stmt)
         total_count: int = total.one()
         
         offset = (page - 1) * page_size
         
         data_stmt = (
-            select(Image)
+            select(Document)
             .offset(offset)
             .limit(page_size)
-            .order_by(desc(Image.id))
+            .order_by(desc(Document.id))
         )
         results = await self.session.exec(data_stmt)
         items: List[Image] = list(results.all()) # type: ignore
@@ -30,15 +30,15 @@ class ImageCrud:
             items=items
         )
     
-    async def get_by_slug(self, slugname: str) -> Optional[Image]:
-        stmt = select(Image).where(Image.slug == slugname)
+    async def get_by_slug(self, slugname: str) -> Optional[Document]:
+        stmt = select(Document).where(Document.slug == slugname)
         result = await self.session.exec(stmt)
-        image = result.first()
-        return image
+        document = result.first()
+        return document
     
     
-    async def add(self, raw_filename: str, slug: str, mime_type: str, size: int) -> Optional[Image]:
-        image_record = Image(
+    async def add(self, raw_filename: str, slug: str, mime_type: str, size: int) -> Optional[Document]:
+        image_record = Document(
             raw_filename=raw_filename,
             slug=slug,
             mime_type=mime_type,
@@ -50,9 +50,9 @@ class ImageCrud:
     
     async def recoder_view(self, slugname: str) -> None:
         stmt = (
-            update(Image)
-            .where(Image.slug == slugname) # type: ignore
-            .values({Image.view: Image.view + 1})
+            update(Document)
+            .where(Document.slug == slugname) # type: ignore
+            .values({Document.view: Document.view + 1})
         )
         await self.session.exec(stmt)
         await self.session.commit()

@@ -5,7 +5,7 @@ from os import path
 from fastapi import Depends, UploadFile, HTTPException, status, Query
 from fastapi.responses import FileResponse
 from sqlmodel.ext.asyncio.session import AsyncSession
-from src.settings import image_dir, ALLOW_TYPE
+from src.settings import image_dir, ALLOW_IMAGE_TYPE
 from src.database import get_session
 from src.service import ImageService
 from src.model import PageResponse
@@ -25,7 +25,7 @@ async def get_images(
 
 @router.post('/image')
 async def create_upload_file(file: UploadFile, session: AsyncSession = Depends(get_session)):
-    if file.content_type not in ALLOW_TYPE:
+    if file.content_type not in ALLOW_IMAGE_TYPE:
         raise HTTPException(
             status_code=400,
             detail="仅支持 JPG, PNG, WebP 格式的图片"

@@ -1,7 +1,7 @@
 from uvicorn import run
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from src.router import router as image_router
+from src.router import image_router, document_router
 
 
 app = FastAPI()
@@ -15,6 +15,7 @@ app.add_middleware(
 )
 
 app.include_router(image_router, tags=['图片模块'])
+app.include_router(document_router, tags=['文件模块'])
 
 if __name__ == "__main__":
-    run(app, host='0.0.0.0', port=80)
+    run(app, host='0.0.0.0', port=8080)
